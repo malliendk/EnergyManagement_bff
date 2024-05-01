@@ -1,7 +1,7 @@
-package com.dillian.energymanagement_game_elements;
+package com.dillian.energymanagement_game_elements.util.services;
 
-import com.dillian.energymanagement_game_elements.dto.AccountDto;
-import com.dillian.energymanagement_game_elements.dto.SourceDto;
+import com.dillian.energymanagement_game_elements.dto.apiDto.AccountDto;
+import com.dillian.energymanagement_game_elements.dto.apiDto.LoadSourceDto;
 import com.dillian.energymanagement_game_elements.util.enums.SupplyType;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,10 +29,10 @@ public class GridLoadCalculator {
         return totalSurplusAmount / 50;
     }
 
-    public double forSources(List<SourceDto> startingSources) {
+    public double forSources(List<LoadSourceDto> startingSources) {
         return startingSources
                 .stream()
-                .mapToDouble(SourceDto::getGridLoad)
+                .mapToDouble(LoadSourceDto::getGridLoad)
                 .sum();
     }
 }

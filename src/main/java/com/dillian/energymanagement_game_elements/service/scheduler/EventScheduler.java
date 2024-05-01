@@ -1,11 +1,12 @@
-package com.dillian.energymanagement_game_elements;
+package com.dillian.energymanagement_game_elements.service.scheduler;
 
-import com.dillian.energymanagement_game_elements.dto.EventDto;
-import com.dillian.energymanagement_game_elements.dto.GameDto;
-import com.dillian.energymanagement_game_elements.dto.SourceDto;
+import com.dillian.energymanagement_game_elements.service.builder.FundsPopularityBuilder;
+import com.dillian.energymanagement_game_elements.util.services.GridLoadCalculator;
+import com.dillian.energymanagement_game_elements.dto.gameDto.EventDto;
+import com.dillian.energymanagement_game_elements.dto.gameDto.GameDto;
+import com.dillian.energymanagement_game_elements.dto.apiDto.LoadSourceDto;
 import com.dillian.energymanagement_game_elements.service.ApiRetrieveService;
-import com.dillian.energymanagement_game_elements.service.ListBuilderService;
-import lombok.AllArgsConstructor;
+import com.dillian.energymanagement_game_elements.util.services.ListBuilderService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
@@ -17,17 +18,24 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 @Service
-@AllArgsConstructor
 @Slf4j
 public class EventScheduler implements InitializingBean {
 
     private final ApiRetrieveService retrieveService;
     private final ListBuilderService listBuilder;
     private final GridLoadCalculator gridLoadCalculator;
+    private final FundsPopularityBuilder fundsPopularityBuilder;
     private ScheduledExecutorService schedulerService;
+    private EventDto eventDto;
     private GameDto gameDto;
-    private List<EventDto> initialEvents;
+    private List<com.dillian.energymanagement_game_elements.dto.apiDto.EventDto> initialEvents;
 
+    public EventScheduler(final ApiRetrieveService retrieveService, final ListBuilderService listBuilder, final GridLoadCalculator gridLoadCalculator, final FundsPopularityBuilder fundsPopularityBuilder) {
+        this.retrieveService = retrieveService;
+        this.listBuilder = listBuilder;
+        this.gridLoadCalculator = gridLoadCalculator;
+        this.fundsPopularityBuilder = fundsPopularityBuilder;
+    }
 
     @Override
     public void afterPropertiesSet() {
@@ -55,7 +63,8 @@ public class EventScheduler implements InitializingBean {
             try {
                 if (!initialEvents.isEmpty()) {
                     log.info("event schedule started");
-                    EventDto newEvent = pickEventFromList();
+                    com.dillian.energymanagement_game_elements.dto.apiDto.EventDto newEvent = pickEventFromList();
+                    fundsPopularityBuilder.updateFundsAndPopularity(gameDto, newEvent.getSource());
                     this.gameDto = updateGameDto(gameDto, newEvent);
                 } else {
                     log.info("Scheduler shutdown");
@@ -68,9 +77,9 @@ public class EventScheduler implements InitializingBean {
         }, initialDelay, period, TimeUnit.SECONDS);
     }
 
-    private GameDto updateGameDto(GameDto gameDto, EventDto newEvent) {
-        List<EventDto> newEventList = listBuilder.addItemToList(newEvent, gameDto.getEvents());
-        List<SourceDto> newSourceList = listBuilder.addItemToList(newEvent.getSource(), gameDto.getSources());
+    private GameDto updateGameDto(GameDto gameDto, com.dillian.energymanagement_game_elements.dto.apiDto.EventDto newEvent) {
+        List<com.dillian.energymanagement_game_elements.dto.apiDto.EventDto> newEventList = listBuilder.addItemToList(newEvent, gameDto.getEvents());
+        List<LoadSourceDto> newSourceList = listBuilder.addItemToList(newEvent.getSource(), gameDto.getSources());
         double newGridLoad = gridLoadCalculator.forSources(newSourceList);
         gameDto.setEvents(newEventList);
         gameDto.setSources(newSourceList);
@@ -78,12 +87,12 @@ public class EventScheduler implements InitializingBean {
         return gameDto;
     }
 
-    private EventDto pickEventFromList() {
+    private com.dillian.energymanagement_game_elements.dto.apiDto.EventDto pickEventFromList() {
         if (initialEvents != null) {
             initialEvents.forEach(event -> log.info(event.getName()));
         }
         int randomIndex = new Random().nextInt(initialEvents.size());
-        final EventDto eventToUpload = initialEvents.get(randomIndex);
+        final com.dillian.energymanagement_game_elements.dto.apiDto.EventDto eventToUpload = initialEvents.get(randomIndex);
         initialEvents.remove(eventToUpload);
         return eventToUpload;
     }

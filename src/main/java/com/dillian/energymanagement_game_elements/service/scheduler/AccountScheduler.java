@@ -1,8 +1,8 @@
-package com.dillian.energymanagement_game_elements;
+package com.dillian.energymanagement_game_elements.service.scheduler;
 
-import com.dillian.energymanagement_game_elements.dto.AccountDto;
-import com.dillian.energymanagement_game_elements.dto.GameDto;
-import lombok.AllArgsConstructor;
+import com.dillian.energymanagement_game_elements.util.services.GridLoadCalculator;
+import com.dillian.energymanagement_game_elements.dto.apiDto.AccountDto;
+import com.dillian.energymanagement_game_elements.dto.gameDto.GameDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -10,9 +10,9 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 @Service
-@AllArgsConstructor
 @Slf4j
 public class AccountScheduler {
 
@@ -20,12 +20,16 @@ public class AccountScheduler {
     private ScheduledExecutorService schedulerService;
     private GameDto gameDto;
 
+    public AccountScheduler(final GridLoadCalculator gridLoadCalculator) {
+        this.gridLoadCalculator = gridLoadCalculator;
+    }
+
     public GameDto getUpdatedGameDto() {
         return this.gameDto;
     }
 
 
-    private void startFluctuatingAccountSupply(GameDto gameDto) {
+    public void startFluctuatingAccountSupply(GameDto gameDto) {
         long initialDelay = 0;
         long period = 5;
         schedulerService = Executors.newScheduledThreadPool(1);
@@ -40,14 +44,20 @@ public class AccountScheduler {
     }
 
     private GameDto fluctuateGridLoad(GameDto gameDto) {
-        final List<AccountDto> updatedAccounts = fluctuateSupplyAmount(gameDto.getAccounts());
+        final List<AccountDto> updatedAccounts = getNewRandomSupplyAmount(gameDto.getAccounts());
         final double newGridLoad = gridLoadCalculator.forAccounts(updatedAccounts);
         gameDto.setAccounts(updatedAccounts);
         gameDto.setTotalGridLoad(newGridLoad);
         return gameDto;
     }
 
-    public List<AccountDto> fluctuateSupplyAmount(List<AccountDto> accounts) {
+    private List<AccountDto> getNewRandomSupplyAmount(List<AccountDto> accounts) {
+        double newSupplyAmount = 0.3 + (Math.random() * 1.7);
+        accounts.forEach(accountDto -> accountDto.setSupplyAmount(newSupplyAmount));
+        return accounts;
+    }
+
+    private List<AccountDto> optimizeSupplyAmount(List<AccountDto> accounts) {
         accounts.forEach(account -> {
             double supplyAmount = account.getSupplyAmount();
             double newSupplyAmount = 0;

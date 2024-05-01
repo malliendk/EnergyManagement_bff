@@ -1,4 +1,4 @@
-package com.dillian.energymanagement_game_elements.util;
+package com.dillian.energymanagement_game_elements.util.constants;
 
 public class Constants {
 

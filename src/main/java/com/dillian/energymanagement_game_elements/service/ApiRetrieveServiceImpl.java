@@ -1,9 +1,9 @@
 package com.dillian.energymanagement_game_elements.service;
 
-import com.dillian.energymanagement_game_elements.dto.AccountDto;
-import com.dillian.energymanagement_game_elements.dto.EventDto;
-import com.dillian.energymanagement_game_elements.dto.LocalityDto;
-import com.dillian.energymanagement_game_elements.dto.SourceDto;
+import com.dillian.energymanagement_game_elements.dto.apiDto.AccountDto;
+import com.dillian.energymanagement_game_elements.dto.apiDto.EventDto;
+import com.dillian.energymanagement_game_elements.dto.apiDto.LoadSourceDto;
+import com.dillian.energymanagement_game_elements.dto.gameDto.GameDto;
 import lombok.AllArgsConstructor;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
@@ -35,8 +35,8 @@ public class ApiRetrieveServiceImpl implements ApiRetrieveService {
     }
 
     @Override
-    public List<SourceDto> getSources() {
-        final List<SourceDto> sources = restClient
+    public List<LoadSourceDto> getSources() {
+        final List<LoadSourceDto> sources = restClient
                 .get()
                 .uri("/source")
                 .retrieve()
@@ -61,4 +61,12 @@ public class ApiRetrieveServiceImpl implements ApiRetrieveService {
         return events;
     }
 
+    @Override
+    public GameDto getMoneyAndPopularityDto() {
+        return restClient
+                .get()
+                .uri("http://localhost:8082/")
+                .retrieve()
+                .body(GameDto.class);
+    }
 }

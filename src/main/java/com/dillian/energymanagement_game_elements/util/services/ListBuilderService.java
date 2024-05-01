@@ -1,4 +1,4 @@
-package com.dillian.energymanagement_game_elements.service;
+package com.dillian.energymanagement_game_elements.util.services;
 
 import org.springframework.stereotype.Service;
 

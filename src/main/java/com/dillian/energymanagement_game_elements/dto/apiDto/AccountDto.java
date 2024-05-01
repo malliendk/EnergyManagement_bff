@@ -1,4 +1,4 @@
-package com.dillian.energymanagement_game_elements.dto;
+package com.dillian.energymanagement_game_elements.dto.apiDto;
 
 
 import com.dillian.energymanagement_game_elements.util.enums.SupplyType;

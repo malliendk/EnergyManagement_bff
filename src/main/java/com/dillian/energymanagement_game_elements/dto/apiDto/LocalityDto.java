@@ -1,4 +1,4 @@
-package com.dillian.energymanagement_game_elements.dto;
+package com.dillian.energymanagement_game_elements.dto.apiDto;
 
 import lombok.Getter;
 import lombok.Setter;

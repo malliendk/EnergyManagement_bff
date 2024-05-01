@@ -1,11 +1,8 @@
-package com.dillian.energymanagement_game_elements.service;
-
-import org.springframework.stereotype.Service;
+package com.dillian.energymanagement_game_elements.util.services;
 
 import java.util.List;
 import java.util.stream.Stream;
 
-@Service
 public class ListBuilderServiceImpl implements ListBuilderService {
 
     @Override

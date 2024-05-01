@@ -1,6 +1,15 @@
 package com.dillian.energymanagement_game_elements;
 
-import com.dillian.energymanagement_game_elements.dto.GameDto;
+import com.dillian.energymanagement_game_elements.dto.gameDto.AccountLocalityDto;
+import com.dillian.energymanagement_game_elements.dto.gameDto.FundsPopularityDto;
+import com.dillian.energymanagement_game_elements.dto.gameDto.GameDto;
+import com.dillian.energymanagement_game_elements.dto.gameDto.SourcesGridLoadDto;
+import com.dillian.energymanagement_game_elements.service.ApiRetrieveService;
+import com.dillian.energymanagement_game_elements.service.builder.AccountBuilder;
+import com.dillian.energymanagement_game_elements.service.builder.FundsPopularityBuilder;
+import com.dillian.energymanagement_game_elements.service.builder.SourceBuilder;
+import com.dillian.energymanagement_game_elements.service.scheduler.AccountScheduler;
+import com.dillian.energymanagement_game_elements.service.scheduler.EventScheduler;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -12,21 +21,26 @@ public class GameDtoBuilder {
     private final AccountBuilder accountBuilder;
     private final AccountScheduler accountScheduler;
     private final EventScheduler eventScheduler;
+    private final ApiRetrieveService retrieveService;
+    private final FundsPopularityBuilder fundsPopularityBuilder;
 
 
-    public GameDto buildInitialDto(int startingSourceAmount, double distributionEfficiency) {
-        GameDto gameDto = new GameDto();
-        GameDto fromAccountBuilder = accountBuilder.getGameDto();
-        GameDto fromSourceBuilder = sourceBuilder.getGameDto(startingSourceAmount);
-
-        gameDto.setLocalityName(fromSourceBuilder.getLocalityName());
-        gameDto.setAccounts(fromAccountBuilder.getAccounts());
-        gameDto.setSources(fromSourceBuilder.getSources());
+    public GameDto buildInitialDto(int startingSourceAmount) {
+        GameDto startingGameDto = new GameDto();
+        final AccountLocalityDto fromAccountBuilder = accountBuilder.getDto();
+        startingGameDto.setAccounts(fromAccountBuilder.getAccounts());
+        startingGameDto.setLocalityName(fromAccountBuilder.getLocalityName());
+        final SourcesGridLoadDto fromSourceBuilder = sourceBuilder.toGameDto();
+        startingGameDto.setSources(fromSourceBuilder.getSources());
+        startingGameDto.setDistributionEfficiency(fromSourceBuilder.getDistributionEfficiency());
         final double totalGridLoad = fromAccountBuilder.getTotalGridLoad() + fromSourceBuilder.getTotalGridLoad()
-                * gameDto.getDistributionEfficiency();
-        gameDto.setTotalGridLoad(totalGridLoad);
-
-        return gameDto;
+                * startingGameDto.getDistributionEfficiency();
+        startingGameDto.setTotalGridLoad(totalGridLoad);
+        final FundsPopularityDto startingResourcesDto = fundsPopularityBuilder.getInitialResources();
+        startingGameDto.setFunds(startingResourcesDto.getFunds());
+        startingGameDto.setPopularity(startingResourcesDto.getPopularity());
+        startingGameDto.setAmountOfStartingSources(startingSourceAmount);
+        return startingGameDto;
     }
 
     public GameDto updateGameDto(GameDto gameDto){
@@ -35,6 +49,9 @@ public class GameDtoBuilder {
         gameDto.setAccounts(accountScheduled.getAccounts());
         gameDto.setTotalGridLoad(accountScheduled.getTotalGridLoad());
         gameDto.setEvents(eventScheduled.getEvents());
+        final GameDto moneyAndPopularityDto = retrieveService.getMoneyAndPopularityDto();
+        gameDto.setFunds(moneyAndPopularityDto.getFunds());
+        gameDto.setPopularity(moneyAndPopularityDto.getPopularity());
         return gameDto;
     }
 
