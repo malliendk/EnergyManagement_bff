@@ -1,14 +1,10 @@
 package com.dillian.energymanagement_game_elements.service;
 
-import com.dillian.energymanagement_game_elements.dto.apiDto.AccountDto;
-import com.dillian.energymanagement_game_elements.dto.apiDto.EventDto;
-import com.dillian.energymanagement_game_elements.dto.apiDto.LoadSourceDto;
-import com.dillian.energymanagement_game_elements.dto.gameDto.GameDto;
+import com.dillian.energymanagement_game_elements.dto.apiDto.*;
 import lombok.AllArgsConstructor;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.List;
 
@@ -16,18 +12,27 @@ import java.util.List;
 @AllArgsConstructor
 public class ApiRetrieveServiceImpl implements ApiRetrieveService {
 
-    private final RestClient restClient;
-    public List<EventDto> events;
+    private final WebClient webClient;
 
-
+    @Override
+    public LocalityDto getLocality(String localityName) {
+        return webClient
+                .get()
+                .uri("/locality", localityName)
+                .retrieve()
+                .bodyToMono(LocalityDto.class)
+                .block();
+    }
 
     @Override
     public List<AccountDto> getAccountsByLocality(String localityName) {
-        final List<AccountDto> accounts = restClient
+        final List<AccountDto> accounts = webClient
                 .get()
                 .uri("/accounts/locality", localityName)
                 .retrieve()
-                .body(new ParameterizedTypeReference<>() {});
+                .bodyToFlux(AccountDto.class)
+                .collectList()
+                .block();
         if (accounts == null || accounts.isEmpty()) {
             throw new RestClientException("Unable to retrieve Accounts by Locality");
         }
@@ -35,12 +40,24 @@ public class ApiRetrieveServiceImpl implements ApiRetrieveService {
     }
 
     @Override
+    public SupervisorDto getSupervisorByLocality(String localityName) {
+        return webClient
+                .get()
+                .uri("/supervisor/locality", localityName)
+                .retrieve()
+                .bodyToMono(SupervisorDto.class)
+                .block();
+    }
+
+    @Override
     public List<LoadSourceDto> getSources() {
-        final List<LoadSourceDto> sources = restClient
+        final List<LoadSourceDto> sources = webClient
                 .get()
                 .uri("/source")
                 .retrieve()
-                .body(new ParameterizedTypeReference<>() {});
+                .bodyToFlux(LoadSourceDto.class)
+                .collectList()
+                .block();
         if (sources == null || sources.isEmpty()) {
             throw new RestClientException("Unable to retrieve LoadSources");
         }
@@ -49,24 +66,16 @@ public class ApiRetrieveServiceImpl implements ApiRetrieveService {
 
     @Override
     public List<EventDto> getEvents() {
-        final List<EventDto> events = restClient
+        final List<EventDto> events = webClient
                 .get()
                 .uri("/source")
                 .retrieve()
-                .body(new ParameterizedTypeReference<>() {
-                });
+                .bodyToFlux(EventDto.class)
+                .collectList()
+                .block();
         if (events == null || events.isEmpty()) {
             throw new RestClientException("Unable to retrieve Events");
         }
         return events;
-    }
-
-    @Override
-    public GameDto getMoneyAndPopularityDto() {
-        return restClient
-                .get()
-                .uri("http://localhost:8082/")
-                .retrieve()
-                .body(GameDto.class);
     }
 }

@@ -1,51 +1,47 @@
 package com.dillian.energymanagement_game_elements.service.builder;
 
-import com.dillian.energymanagement_game_elements.DtoService;
-import com.dillian.energymanagement_game_elements.util.services.GridLoadCalculator;
 import com.dillian.energymanagement_game_elements.dto.apiDto.AccountDto;
 import com.dillian.energymanagement_game_elements.dto.gameDto.AccountLocalityDto;
 import com.dillian.energymanagement_game_elements.dto.gameDto.InitiateGameDto;
 import com.dillian.energymanagement_game_elements.service.ApiRetrieveService;
+import com.dillian.energymanagement_game_elements.service.InitiateDtoService;
+import com.dillian.energymanagement_game_elements.util.services.GridLoadCalculator;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClientException;
 
 import java.util.List;
 
 @Service
+@AllArgsConstructor
 @Slf4j
 public class AccountBuilder {
 
     private final ApiRetrieveService retrieveService;
-    private final DtoService dtoService;
+    private final InitiateDtoService initiateDtoService;
     private final GridLoadCalculator gridLoadCalculator;
 
 
-    public AccountBuilder(final ApiRetrieveService retrieveService, final DtoService dtoService, final GridLoadCalculator gridLoadCalculator) {
-        this.retrieveService = retrieveService;
-        this.dtoService = dtoService;
-        this.gridLoadCalculator = gridLoadCalculator;
-    }
-
-    public AccountLocalityDto getDto() {
-        AccountLocalityDto dto = fetchInitialAccounts();
-        dto.setTotalGridLoad(getTotalGridLoad());
+    public AccountLocalityDto toGameDto() {
+        AccountLocalityDto dto = new AccountLocalityDto();
+        List<AccountDto> accounts = fetchInitialAccounts();
+        dto.setAccounts(accounts);
+        double totalGridLoad = calculateTotalGridLoad(accounts);
+        dto.setTotalGridLoad(totalGridLoad);
         return dto;
     }
 
-    private double getTotalGridLoad() {
-        List<AccountDto> accounts = fetchInitialAccounts().getAccounts();
+    private double calculateTotalGridLoad(List<AccountDto> accounts) {
         return gridLoadCalculator.forAccounts(accounts);
     }
 
-    private AccountLocalityDto fetchInitialAccounts() {
-        final InitiateGameDto initDto = dtoService.getInitiateGameDto();
-        final List<AccountDto> initialAccounts = retrieveService.getAccountsByLocality(initDto.getLocalityName());
-        if (initialAccounts.isEmpty()) {
-            throw new RestClientException("Couldn't retrieve accounts from gameDto");
-        }
-        return new AccountLocalityDto(initialAccounts, initDto.getLocalityName());
+    private List<AccountDto> fetchInitialAccounts() {
+        return retrieveService.getAccountsByLocality(getInitiateGameDto().getLocalityName());
     }
 
-
+    private InitiateGameDto getInitiateGameDto() {
+        final InitiateGameDto initDto = initiateDtoService.getStoredInitiateGameDto();
+        log.info("Initiate game dto AccountBuilder: {}", initDto);
+        return initDto;
+    }
 }

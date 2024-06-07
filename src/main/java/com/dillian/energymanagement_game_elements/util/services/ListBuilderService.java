@@ -1,10 +1,7 @@
 package com.dillian.energymanagement_game_elements.util.services;
 
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 
-@Service
 public interface ListBuilderService {
     <S> List<S> addItemToList(S newItem, List<S> existingList);
 

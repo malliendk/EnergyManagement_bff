@@ -12,9 +12,4 @@ public class AccountLocalityDto {
 
     private List<AccountDto> accounts;
     private double totalGridLoad;
-    private String localityName;
-
-    public AccountLocalityDto(final List<AccountDto> initialAccounts, final String localityName) {
-
-    }
 }

@@ -1,8 +1,8 @@
 package com.dillian.energymanagement_game_elements.service.scheduler;
 
-import com.dillian.energymanagement_game_elements.util.services.GridLoadCalculator;
 import com.dillian.energymanagement_game_elements.dto.apiDto.AccountDto;
 import com.dillian.energymanagement_game_elements.dto.gameDto.GameDto;
+import com.dillian.energymanagement_game_elements.util.services.GridLoadCalculator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 

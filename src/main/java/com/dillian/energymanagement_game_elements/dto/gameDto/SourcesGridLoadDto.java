@@ -12,6 +12,4 @@ public class SourcesGridLoadDto {
 
     private List<LoadSourceDto> sources;
     private double totalGridLoad;
-    private double distributionEfficiency;
-
 }

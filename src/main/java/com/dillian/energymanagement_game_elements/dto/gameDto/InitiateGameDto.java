@@ -13,5 +13,4 @@ public class InitiateGameDto {
     private DifficultyLevel difficultyLevel;
     private String localityName;
     private double distributionEfficiency;
-    private int startingSourcesAmount;
 }

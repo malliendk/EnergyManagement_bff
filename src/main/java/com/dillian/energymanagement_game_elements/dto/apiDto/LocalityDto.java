@@ -9,9 +9,10 @@ import java.util.List;
 @Setter
 public class LocalityDto {
 
-    String name;
-    String description;
-    String supervisorName;
-    List<AccountDto> accounts;
-    List<EventDto> events;
+    private String name;
+    private String description;
+    private String supervisorName;
+    private int startingSourcesAmount;
+    private List<AccountDto> accounts;
+    private List<EventDto> events;
 }

@@ -17,7 +17,7 @@ public class GameDto {
 
     String localityName; //check
     double totalGridLoad; //check
-    int amountOfStartingSources; //check; implemented by DifficultyLevel
+    int startingSourcesAmount; //check; implemented by DifficultyLevel
     int funds; //check; starting funds implemented by DifficultyLevel
     int popularity;  //check; starting popularoty implementented by DifficultyLevel
     double distributionEfficiency; //check:
